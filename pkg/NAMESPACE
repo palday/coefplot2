@@ -1,0 +1,29 @@
+export(coefplot2,coefplot2.default,coeftab,coeftab0,
+       coefplot2.fitList)
+importClassesFrom(lme4,mer,summary.mer)
+importMethodsFrom(lme4,coef,summary,show,model.matrix,VarCorr)
+## importFrom(nlme,VarCorr) ## conflict!
+importFrom(Matrix,summary)
+exportMethods(coefplot2,summary,coef,show,model.matrix)
+importFrom(reshape,melt)
+## avoid lme4a dependence ...
+## importClassesFrom(lme4a,merMod)
+## exportClasses(mer) ## can I get away without this?
+##
+S3method(coeftab,default)
+## Bayesian methods
+S3method(coeftab,MCMCglmm)
+S3method(coeftab,rjags)
+S3method(coeftab,bugs)
+S3method(coeftab,mcmc)
+S3method(coeftab,mcmc.list)
+## mixed models
+S3method(coeftab,lme)
+S3method(coeftab,glmmML)
+S3method(coeftab,mer)
+S3method(coeftab,glmm.admb)
+S3method(coeftab,admb)
+##
+S3method(print,coeftab)
+
+
