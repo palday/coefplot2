@@ -1,0 +1,19 @@
+2011-04-22  Ben Bolker  <bolker@mcmaster.ca>
+
+	* fixed small bug in coefplot2.model (full class not set properly)
+
+2011-04-08  Ben Bolker  <bolker@mcmaster.ca>
+
+	* added (internal) as.mcmc.bugs from emdbook
+	* added "glmmML" to knownclasses
+	* added "ANY" method
+
+2011-03-26  Ben Bolker  <bolker@mcmaster.ca>
+
+	* myriad changes from original arm::coefplot, including:
+	- slightly different (better?) margin handling/resetting
+	- default value of "offset" changed to zero; must set explicitly when adding to a plot
+	* can do coefplot on a list() of similar models (with legends etc.)
+	* slightly changed interface 
+	* extended list of model types
+

@@ -1,0 +1,69 @@
+
+R version 2.13.0 alpha (2011-03-18 r54865)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: i686-pc-linux-gnu (32-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+Loading required package: utils
+[Previously saved workspace restored]
+
+> library(coefplot2)
+Loading required package: coda
+Loading required package: lattice
+> library(lme4)
+Loading required package: Matrix
+
+Attaching package: 'Matrix'
+
+The following object(s) are masked from 'package:base':
+
+    det
+
+
+Attaching package: 'lme4'
+
+The following object(s) are masked from 'package:coda':
+
+    HPDinterval
+
+The following object(s) are masked from 'package:stats':
+
+    AIC, BIC
+
+> library(glmmADMB)
+
+Attaching package: 'glmmADMB'
+
+The following object(s) are masked from 'package:lme4':
+
+    ranef
+
+> if (FALSE)  {
++   ## lme4
++   epil2$indiv <- 1:nrow(epil2)
++   epil2_glmer_0 <- glmer(y~Base*trt+Age+Visit+(Visit|subject),
++              data=epil2,family="poisson")
++   epil2_glmer_1 <- update(epil2_glmer_1,.~.+(1|indiv))
++   ##
++   ## glmmADMB (0.5-2)
++   epil2_glmmADMB <- glmm.admb(y~Base*trt+Age+Visit,
++                               random=~Visit, group="subject",
++                               data=epil2, family="nbinom")
++ }
+> load("epil2_fits.RData")
+> coef(summary(object))
+Execution halted
