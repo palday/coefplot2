@@ -174,7 +174,7 @@ coeftab.glmm.admb <- function(object,ptype="fixef",...) {
 coeftab.default <- function(object,ctype="quad",...) {
   cc <- coeftab0(coef(summary(object))[,1:2],...)
   ## FIXME: deal with types that don't have a working model.matrix()
-  attr(cc,"assign") <- try(attr(model.matrix(object),"assign"))
+  attr(cc,"assign") <- try(attr(model.matrix(object),"assign"),silent=TRUE)
   cc
 }
 
