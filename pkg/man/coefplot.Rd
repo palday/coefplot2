@@ -38,7 +38,9 @@ coefplot2(object,\dots)
                 col.pts=1, pch.pts=16, var.las=2,
                 main="Regression estimates",
                 xlab="", ylab="", mar=NULL, plot=TRUE,
-                add=FALSE, offset=0, lwd.1=2, lwd.2=1,
+                add=FALSE, offset=0,
+                varname.offset=0,
+                lwd.1=2, lwd.2=1,
                 lower1, upper1, lower2, upper2, \dots)
 \S4method{coefplot2}{list}(object, col.pts=1:length(object),
                              pch.pts=16,
@@ -108,6 +110,8 @@ coefplot2(object,\dots)
   \item{plot}{(logical) plot the estimates?}
   \item{add}{(logical) plot over the existing plot?}
   \item{offset}{added extra spaces to separate from the existing dots}
+  \item{varname.offset}{offset to variable names (primarily for
+     internal use by the `list' method for coefplot2)}
 %  \item{lower.bound}{default is -Inf.}
   \item{var.idx}{the index of the variables: default
     is to plot all the variables.}

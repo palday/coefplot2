@@ -1,3 +1,7 @@
+2011-08-22  Ben Bolker  <bolker@mcmaster.ca>
+
+	* adjust horizontal/vertical limits and variable name positions for list-plots
+
 2011-04-22  Ben Bolker  <bolker@mcmaster.ca>
 
 	* fixed small bug in coefplot2.model (full class not set properly)

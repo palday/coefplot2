@@ -1,5 +1,5 @@
 export(coefplot2,coefplot2.default,coeftab,coeftab0,
-       coefplot2.fitList)
+       coefplot2.fitList,extend_tab)
 importClassesFrom(lme4,mer,summary.mer)
 importMethodsFrom(lme4,coef,summary,show,model.matrix,VarCorr)
 ## importFrom(nlme,VarCorr) ## conflict!

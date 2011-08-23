@@ -18,9 +18,6 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
-Loading required package: utils
-[Previously saved workspace restored]
-
 > ## compare/contrast original and hacked coefplot
 > library(arm)
 Loading required package: MASS
@@ -51,13 +48,9 @@ The following object(s) are masked from 'package:lme4':
     HPDinterval
 
 Loading required package: abind
-Loading required package: car
-Loading required package: nnet
-Loading required package: survival
-Loading required package: splines
 
-arm (Version 1.4-06, built: 2011-3-2)
-Working directory is /mnt/hgfs/bolker/Documents/R/pkgs/coefplot2/tests 
+arm (Version 1.4-13, built: 2011-6-19)
+Working directory is /mnt/hgfs/bolker/Documents/R/pkgs/coefplot2/pkg/tests 
 Loading required package: foreign
 
 Attaching package: 'arm'
@@ -188,8 +181,7 @@ pdf
 > coefplot2(M1, add=TRUE, offset=0.1, col.pts="red",intercept=TRUE)
 > 
 > coefplot2(list(M2,M1),xlim=c(-1,5),intercept=TRUE)
-Called from: .local(object, ...)
-Browse[1]> 
+> 
 > 
 > ##==================== 
 > ## arrayed plot       
@@ -212,11 +204,10 @@ Re-fitting to get Hessian
 
 Re-fitting to get Hessian
 
-Called from: .local(object, ...)
-Browse[1]> 
 Warning message:
 In .local(object, ...) :
   dropping first coefficient from each model (non-standard naming)
+> 
 > 
 > ## FIXME: commented out in arm -- can it be resurrected?
 > ## plot 6: plot bugs & lmer
@@ -239,4 +230,4 @@ pdf
 > 
 > proc.time()
    user  system elapsed 
-  4.556   0.508   5.140 
+  4.048   2.428   6.480 

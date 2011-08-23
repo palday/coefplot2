@@ -34,6 +34,7 @@ coefplot2.default <- function(coefs, sds,
                               mar=NULL,
                               plot=TRUE, add=FALSE,
                               offset=0,
+                              varname.offset=0,
                               lwd.1=2,lwd.2=1,
                               lower1, upper1, lower2, upper2, ...)
 {
@@ -110,7 +111,7 @@ coefplot2.default <- function(coefs, sds,
             if (top.axis) axis(3) else axis(1)
           }
           if (v.axis){
-            axis(2, n.x:1, varnames[n.x:1], las=var.las, tck=FALSE, 
+            axis(2, (n.x:1)+varname.offset, varnames[n.x:1], las=var.las, tck=FALSE, 
                  lty=0, cex.axis=cex.var) 
           }
           abline(v=0, lty=2)
@@ -138,7 +139,7 @@ coefplot2.default <- function(coefs, sds,
           #axis(4, las=var.las)
         }
         if (h.axis){
-          axis(1, 1:n.x, varnames[1:n.x], las=var.las, tck=FALSE, 
+          axis(1, (1:n.x)+varname.offset, varnames[1:n.x], las=var.las, tck=FALSE, 
                lty=0, cex.axis=cex.var) 
         }
         abline(h=0, lty=2)
@@ -244,13 +245,20 @@ coefplot2.fitList <- function(object, col.pts=1:length(object),
   n <- length(coeflist)
   offsetvec <- seq(offset,by=spacing,length.out=n, ...)
   lims <- range(unlist(lapply(coeflist,function(x)x[,-1])),na.rm=TRUE)
-  if (vertical && missing(xlim)) xlim <- lims
-  if (!vertical && missing(ylim)) ylim <- lims
+  vlims <- c(1,length(varnames)+max(offsetvec))
+  if (vertical) {
+    if (missing(xlim)) xlim <- lims
+    if (missing(ylim)) ylim <- vlims
+  } else {
+    if (missing(ylim)) ylim <- lims
+    if (missing(xlim)) xlim <- vlims
+  }
   coefplot2.default(coeflist[[1]],
-                   col.pts=col.pts[1],
-                   offset=offsetvec[1],
-                   varnames=varnames,
-                   xlim=xlim,ylim=ylim,...)
+                    col.pts=col.pts[1],
+                    offset=offsetvec[1],
+                    varnames=varnames,
+                    xlim=xlim,ylim=ylim,
+                    varname.offset=mean(offsetvec),...)
   for (i in 2:n) {
     coefplot2.default(coeflist[[i]],col.pts=col.pts[i],
                      offset=offsetvec[i],add=TRUE,...)
