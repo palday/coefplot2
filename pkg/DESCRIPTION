@@ -1,7 +1,7 @@
 Package: coefplot2
 Type: Package
 Title: Coefficient plots
-Version: 0.1
+Version: 0.1.1
 Date: 2011-03-25
 Author: Ben Bolker, Yu-Sung Su
 Maintainer: Ben Bolker <bolker@mcmaster.ca>

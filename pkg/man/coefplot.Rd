@@ -41,23 +41,25 @@ coefplot2(object,\dots)
                 add=FALSE, offset=0,
                 varname.offset=0,
                 lwd.1=2, lwd.2=1,
-                lower1, upper1, lower2, upper2, \dots)
+                lower1, upper1, lower2, upper2,
+xlim=NULL, ylim=NULL, \dots)
 \S4method{coefplot2}{list}(object, col.pts=1:length(object),
                              pch.pts=16,
                              offset=0, spacing=0.1,
                              varnames=NULL, intercept=FALSE, var.idx=NULL,
                              xlim=NULL, ylim=NULL, vertical=TRUE,
                              merge.names=TRUE,
-                             legend=FALSE,legend.args=NULL,
+                             legend=FALSE,legend.x="bottomright",legend.args=NULL,
                              \dots)
 \S4method{coefplot2}{numeric}(object, \dots)
 \S4method{coefplot2}{lm}(object, varnames=NULL, intercept=FALSE, var.idx=NULL, \dots)
 \S4method{coefplot2}{glm}(object, varnames=NULL, intercept=FALSE, var.idx=NULL, \dots)
-\S4method{coefplot2}{polr}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
+\S4method{coefplot2}{polr}(object, varnames=NULL,  intercept=FALSE,
+                var.idx=NULL,\dots)
+\S4method{coefplot2}{admb}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{glmmML}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{lme}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{glmmPQL}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
-\S4method{coefplot2}{admb}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{MCMCglmm}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{list}(object, col.pts=1:length(object),
                              pch.pts=16,
@@ -65,7 +67,7 @@ coefplot2(object,\dots)
                              varnames=NULL, intercept=FALSE, var.idx=NULL,
                              xlim=NULL, ylim=NULL, vertical=TRUE,
                              merge.names=TRUE,
-                             legend=FALSE,legend.args=NULL,
+                             legend=FALSE,legend.x="bottomright",legend.args=NULL,
                              \dots)
 }
 
@@ -121,6 +123,9 @@ coefplot2(object,\dots)
   \item{merge.names}{(logical) attempt to merge names from different
     models?}
   \item{legend}{(logical) plot legend?}
+  \item{legend.x}{specifies \code{x} argument to \code{\link{legend}},
+    which can most conveniently be a position specification such
+    as \code{"top"}, \code{"right"}, etc.}
   \item{legend.args}{(list) list of arguments to \code{\link{legend}},
     overriding built-in defaults}
 }

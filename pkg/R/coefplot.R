@@ -36,7 +36,9 @@ coefplot2.default <- function(coefs, sds,
                               offset=0,
                               varname.offset=0,
                               lwd.1=2,lwd.2=1,
-                              lower1, upper1, lower2, upper2, ...)
+                              lower1, upper1, lower2, upper2,
+                              xlim=NULL, ylim=NULL,
+                              ...)
 {
   ## ?? can't decide whether we want to reset margins, or how ...
   ## par() says that saving and resetting ALL non-RO parameters is 'not good practice'
@@ -91,7 +93,9 @@ coefplot2.default <- function(coefs, sds,
         
   ## add margin to the axis
   k <- 1/n.x   
-  if(plot){
+  if (plot) {
+      dlim <- range(c(coefs.l,coefs.h,coefs),na.rm=TRUE)
+      
       if (vertical){
         if(!add){
           if (missing(mar)) {
@@ -105,8 +109,9 @@ coefplot2.default <- function(coefs, sds,
             }
           }
           par(mar=mar)
+          if (missing(xlim)) xlim <- dlim
           plot(c(coefs.l, coefs.h), c(idx+k,idx-k), type="n",
-               axes=FALSE, main=main, xlab=xlab, ylab=ylab,...) 
+               axes=FALSE, main=main, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab,...) 
           if (h.axis){                                                  
             if (top.axis) axis(3) else axis(1)
           }
@@ -131,8 +136,9 @@ coefplot2.default <- function(coefs, sds,
           mar[1] <- maxchar/10 + 2.1
         }
         par(mar=mar)
+        if (missing(ylim)) ylim <- dlim
         plot(c(idx+k,idx-k), c(coefs.l, coefs.h), type="n", axes=FALSE, 
-          main=main, xlab=xlab, ylab=ylab,
+          main=main, xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim,
              ...)
         if (v.axis){
           axis(2, las=var.las)                                
@@ -150,9 +156,9 @@ coefplot2.default <- function(coefs, sds,
       if (CI==2){
         segments (idx, upper1, idx, lower1, lwd=lwd.1, col=col.pts)     
       }
-    }
+    } ## if horizontal
     } ## if plot
-  else{
+  else { ## no plot (FIXME: why is this here???)
     ## FIXME: carry through margin setting etc.?
     if (vertical){
       if (missing(mar)) {
@@ -160,7 +166,8 @@ coefplot2.default <- function(coefs, sds,
       }
       par(mar=mar)
       plot(c(coefs.l, coefs.h), c(idx+k,idx-k), type="n",                                     
-          axes=FALSE, main="", xlab=xlab, ylab=ylab,...)
+          axes=FALSE, main="", xlab=xlab, ylab=ylab,
+           xlim=xlim,ylim=ylim,...)
     }
     else{ # horizontal
       if (missing(mar)) {
@@ -181,10 +188,10 @@ setMethod("coefplot2", signature(object = "numeric"),
 ## should work for any model type for which 'coeftab' works;
 ##  still need to set 'coefplot' method (could try defining 'ANY' method
 coefplot2.model <- function(object,
-                           varnames=NULL,
-                           intercept=FALSE,
-                           var.idx =NULL,
-                           ...) {
+                            varnames=NULL,
+                            intercept=FALSE,
+                            var.idx =NULL,
+                            ...) {
   if (!missing(intercept) && !missing(var.idx))
     stop("must specify at most one of intercept and var.idx")
   ctab <- coeftab(object, ...)
@@ -196,17 +203,21 @@ coefplot2.model <- function(object,
     stop(message="length of varnames != length of predictors",
          " (varnames must include a name for the constant/intercept)")
   class(ctab) <- c("coeftab","data.frame") ## FIXME:: kluge to restore class
-  ## plotting
-  coefplot2.default(coefs=ctab, varnames=varnames, ...)
+  ## plotting; strip 'ptype' argument from plot call
+  xargs <- list(...)
+  xargs$ptype <- NULL
+  do.call(coefplot2.default,c(list(coefs=ctab, varnames=varnames), xargs))
 }
 
 coefplot2.fitList <- function(object, col.pts=1:length(object),
-                             pch.pts=16,
-                             offset=0, spacing=0.1,
-                             varnames=NULL, intercept=FALSE, var.idx=NULL,
-                             xlim=NULL, ylim=NULL, vertical=TRUE,
-                             merge.names=TRUE,
-                             legend=FALSE,legend.args=NULL,
+                              pch.pts=16,
+                              offset=0, spacing=0.1,
+                              varnames=NULL, intercept=FALSE, var.idx=NULL,
+                              xlim=NULL, ylim=NULL, vertical=TRUE,
+                              merge.names=TRUE,
+                              legend=FALSE,
+                              legend.x="bottomright",
+                              legend.args=NULL,
                              ...) {
   ## generate coef tab
   noint <- missing(intercept)
@@ -244,7 +255,11 @@ coefplot2.fitList <- function(object, col.pts=1:length(object),
          " (varnames must include a name for the constant/intercept)")
   n <- length(coeflist)
   offsetvec <- seq(offset,by=spacing,length.out=n, ...)
-  lims <- range(unlist(lapply(coeflist,function(x)x[,-1])),na.rm=TRUE)
+  ## browser()
+  ## lims <- ## range(unlist(lapply(coeflist,function(x)x[,-1])),na.rm=TRUE)
+  ##  we DO want to examine the estimate column -- for when all quantiles are NA
+  lims <- range(unlist(coeflist),na.rm=TRUE)
+  ## browser()
   vlims <- c(1,length(varnames)+max(offsetvec))
   if (vertical) {
     if (missing(xlim)) xlim <- lims
@@ -253,19 +268,24 @@ coefplot2.fitList <- function(object, col.pts=1:length(object),
     if (missing(ylim)) ylim <- lims
     if (missing(xlim)) xlim <- vlims
   }
-  coefplot2.default(coeflist[[1]],
-                    col.pts=col.pts[1],
-                    offset=offsetvec[1],
-                    varnames=varnames,
-                    xlim=xlim,ylim=ylim,
-                    varname.offset=mean(offsetvec),...)
+  xargs <- list(...)
+  xargs$ptype <- NULL
+  do.call(coefplot2.default,
+          c(list(coefs=coeflist[[1]],
+                 col.pts=col.pts[1],
+                 offset=offsetvec[1],
+                 varnames=varnames,
+                 xlim=xlim,ylim=ylim,
+                 varname.offset=mean(offsetvec)),
+            xargs))
   for (i in 2:n) {
-    coefplot2.default(coeflist[[i]],col.pts=col.pts[i],
-                     offset=offsetvec[i],add=TRUE,...)
+    do.call(coefplot2.default,
+            c(list(coefs=coeflist[[i]],col.pts=col.pts[i],
+                   offset=offsetvec[i],add=TRUE),xargs))
   }
   if (legend) {
     Lnames <- if (!is.null(names(object)))names(object) else paste("model",1:n)
-    Largs <- list(x="bottomright",
+    Largs <- list(x=legend.x,
                   legend=rev(Lnames),
                   pch=rev(pch.pts),
                   col=rev(col.pts),
