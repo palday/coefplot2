@@ -143,7 +143,10 @@ coeftab.mer <- function(object,ptype="fixef",
   if ("vcov" %in% ptype) {
     ## FIXME: deal with correlations/test
     vv <- VarCorr(object)
-    sdvec <- c(sapply(vv,attr,"stddev"),resid=attr(vv,"sc"))
+    sdvec <- sapply(vv,attr,"stddev")
+    if (!is.na(sdres <-attr(vv,"sc"))) {
+      sdvec <- c(sdvec,resid=sdres)
+    }
     names(sdvec) <- paste("sd",names(sdvec),sep=".")
     fvec <- sdvec
     mv <- (sapply(vv,nrow)>1)
