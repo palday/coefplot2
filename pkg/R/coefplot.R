@@ -14,7 +14,8 @@ setOldClass("glmm.admb")
 ## FIXME: decide whether it's OK to import from merMod
 ##   and induce a dependence on lme4a: dummy definition?
 ## "merMod"
-knownclasses <- c("lm","glm","mer","bugs","polr",
+knownclasses <- c("lm","glm","mer",
+                  "bmer","bugs","polr",
                   "rjags","bugs","mcmc","MCMCglmm",
                   "glmm.admb","glmmML")
 
@@ -218,7 +219,7 @@ coefplot2.fitList <- function(object, col.pts=1:length(object),
                               legend=FALSE,
                               legend.x="bottomright",
                               legend.args=NULL,
-                             ...) {
+                              ...) {
   ## generate coef tab
   noint <- missing(intercept)
   noidx <- missing(var.idx)
@@ -237,7 +238,11 @@ coefplot2.fitList <- function(object, col.pts=1:length(object),
     coeflist <- lapply(coeflist,extend_tab,vnames=allnames)
   }
   ## index specified:
-  if (!noidx) coeflist <- lapply(coeflist,function(x) x[var.idx,])
+  if (!noidx) {
+    if (is.list(var.idx)) {
+      coeflist <- mapply(function(X,i) X[i,],coeflist,var.idx,SIMPLIFY=FALSE)
+    } else coeflist <- lapply(coeflist,function(x) x[var.idx,])
+  }
   ## drop intercepts if appropriate
   has_int <- sapply(coeflist,function(x) rownames(x)[1]=="(Intercept)")
   if (!intercept) {
@@ -278,10 +283,12 @@ coefplot2.fitList <- function(object, col.pts=1:length(object),
                  xlim=xlim,ylim=ylim,
                  varname.offset=mean(offsetvec)),
             xargs))
-  for (i in 2:n) {
-    do.call(coefplot2.default,
-            c(list(coefs=coeflist[[i]],col.pts=col.pts[i],
-                   offset=offsetvec[i],add=TRUE),xargs))
+  if (n>1) {
+    for (i in 2:n) {
+      do.call(coefplot2.default,
+              c(list(coefs=coeflist[[i]],col.pts=col.pts[i],
+                     offset=offsetvec[i],add=TRUE),xargs))
+    }
   }
   if (legend) {
     Lnames <- if (!is.null(names(object)))names(object) else paste("model",1:n)
