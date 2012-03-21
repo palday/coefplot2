@@ -9,15 +9,15 @@ setOldClass("MCMCglmm")
 setOldClass("mcmc")
 setOldClass("admb")
 setOldClass("rjags")
-setOldClass("glmm.admb")
+setOldClass("glmmadmb")
 
 ## FIXME: decide whether it's OK to import from merMod
 ##   and induce a dependence on lme4a: dummy definition?
 ## "merMod"
-knownclasses <- c("lm","glm","mer",
+knownclasses <- c("lm","glm","mer","merMod",
                   "bmer","bugs","polr",
                   "rjags","bugs","mcmc","MCMCglmm",
-                  "glmm.admb","glmmML")
+                  "glmmadmb","glmmML")
 
 setGeneric("coefplot2",
               function(object, ...)

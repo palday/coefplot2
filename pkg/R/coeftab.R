@@ -106,9 +106,22 @@ coeftab.bugs <- function(object,...) {
 ## ADD: ADMB output containing mcmc info ...
 
 ###
-coeftab.glmmML <- function(object,ctype="quad",...) {
-  coeftab0(cbind(coef(object),object$coef.sd),...)
-  
+coeftab.glmmML <- function(object,ptype="fixef",
+                           ctype="quad",...) {
+  clist <- list(ftab=NULL, rtab=NULL, vtab=NULL)
+  if ("fixef" %in% ptype) {
+    clist$ftab <- coeftab0(cbind(coef(object),object$coef.sd),...)
+  }
+  if ("vcov" %in% ptype) {
+    ## use delta method to get sd on sigma^2
+    ## Var(sigma^2) = (df/dx)^2*Var(sigma) = 4*sigma^2*Var(sigma)
+    #  sd(sigma^2) = 2*sigma*sd(sigma)
+    clist$vtab <- coeftab0(cbind(object$sigma^2,2*object$sigma*object$sigma.sd),...)
+  }
+  if ("ranef" %in% ptype) {
+    stop("can't recover ranef from glmmML at present")
+  }
+  do.call(rbind,unname(clist))
 }
 
 coeftab.lme <- function(object,ptype="fixef",
@@ -131,45 +144,83 @@ coeftab.lme <- function(object,ptype="fixef",
   do.call(rbind,unname(clist))
 }
 
-coeftab.mer <- function(object,ptype="fixef",
-                        ctype="quad",...) {
+coeftab.mer <- function(object,ptype="fixef",ctype="quad",...) {
   clist <- list(ftab=NULL, rtab=NULL, vtab=NULL)
-  if ("fixef" %in% ptype) clist$ftab <- coeftab.default(object,...) ## fixef
+  if ("fixef" %in% ptype) {
+    ## hack to allow merMod
+    if (inherits(object,"merMod")) {
+      cc <- coeftab0(stats:::coef.default(summary(object))[, 1:2], ...)
+      attr(cc, "assign") <- try(attr(model.matrix(object), "assign"), 
+                                silent = TRUE)
+      clist$ftab <- cc
+    } else clist$ftab <- coeftab.default(object,...) ## fixef
+  }
   if ("ranef" %in% ptype) {
     rr <- unlist(ranef(object,postVar=TRUE))
     aa <- unlist(lapply(ranef(object,postVar=TRUE),attr,"postVar"))
     clist$rtab <- coeftab0(cbind(unlist(rr),sqrt(aa)),...)
   }
   if ("vcov" %in% ptype) {
-    ## FIXME: deal with correlations/test
-    vv <- VarCorr(object)
-    sdvec <- sapply(vv,attr,"stddev")
-    if (!is.na(sdres <-attr(vv,"sc"))) {
-      sdvec <- c(sdvec,resid=sdres)
-    }
-    names(sdvec) <- paste("sd",names(sdvec),sep=".")
-    fvec <- sdvec
-    mv <- (sapply(vv,nrow)>1)
-    if (any(mv)) {
-      warning("correlation handling for mer is a stub -- use with caution/test")
-      corvec <- unlist(sapply(vv[mv],
-                              function(x) {
-                                cmat <- attr(x,"correlation")
-                                cmat[lower.tri(cmat)]
-                              }))
-      names(corvec) <- paste("cor",names(corvec),sep=".")
-      fvec <- c(sdvec,corvec)
+      ## KLUGE!
+      cc <- class(object)
+      pkg <- attr(cc,"package")
+      vv <- if (pkg=="lme4.0" && cc=="mer") {
+          lme4.0:::VarCorr(object)
+      } else if (pkg=="lme4") {
+          if (cc=="mer") {
+              lme4:::VarCorr(object)
+          } else lme4:::VarCorr.merMod(object)
+      }
+      ## if (inherits(object,"mer")) {
+      ## cc <- class(object)
+
+      ## vv <- switch(attr(cc,"package"),
+      ##              lme4=lme4::VarCorr(object),
+      ##              lme4.0=lme.0::VarCorr(object))
+      ## } else {
+      ## FIXME: deal with correlations/test
+      ## vv <- VarCorr(object)
+      ##}
+      sdvec <- drop(unlist(lapply(vv,attr,"stddev")))
+      sdres <- attr(vv,"sc")
+      ## omit scaling parameter if missing or if exactly 1.0 (GLMM)
+      if (!is.na(sdres) && sdres!=1) {
+          sdvec <- c(sdvec,resid=sdres)
+      }
+      varvec <- sdvec^2
+      names(varvec) <- paste("var",names(sdvec),sep=".")
+      fvec <- varvec
+      mv <- (sapply(vv,nrow)>1)
+      if (any(mv)) {
+          warning("correlation handling for mer is a stub -- use with caution/test")
+          covvec <- unlist(sapply(vv[mv],
+                                  function(x) {
+                                      cmat <- x ## return COVARIANCE
+                                      ## cmat <- attr(x,"correlation")
+                                      cc <- cmat[lower.tri(cmat)]
+                                      cnames <- do.call(outer,c(dimnames(cmat),
+                                                                list(FUN=paste,sep=".")))
+                                      names(cc) <- cnames[lower.tri(cnames)]
+                                      cc
+                                  }))
+      names(covvec) <- paste("cov",names(covvec),sep=".")
+      fvec <- c(varvec,covvec)
     }
     clist$vtab <- coeftab0(cbind(fvec,NA),...)
   }
   do.call(rbind,unname(clist))
 }
 
-coeftab.glmm.admb <- function(object,ptype="fixef",...) {
+coeftab.glmerMod <- coeftab.lmerMod <- coeftab.merMod <- coeftab.mer
+
+coeftab.glmmadmb <- function(object,ptype="fixef",...) {
   clist <- list(ftab=NULL, rtab=NULL, vtab=NULL)
   if ("fixef" %in% ptype) clist$ftab <- coeftab0(cbind(object$b,object$stdbeta))
   if ("ranef" %in% ptype) clist$rtab <- coeftab0(cbind(object$U,object$sd_U))
-  if ("vcov" %in% ptype) clist$vtab <- coeftab0(cbind(object$S,object$sd_S))
+  if ("vcov" %in% ptype) {
+    if (any(sapply(object$S,nrow)>1)) stop("complex variance structures not yet handled")
+    clist$vtab <- coeftab0(cbind(unlist(object$S),unlist(object$sd_S)))
+  }
   do.call(rbind,unname(clist))
 }
 

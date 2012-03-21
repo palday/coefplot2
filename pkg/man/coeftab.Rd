@@ -10,7 +10,7 @@
 \alias{coeftab.lme}  
 \alias{coeftab.glmmML}
 \alias{coeftab.mer}
-\alias{coeftab.glmm.admb}
+\alias{coeftab.glmmadmb}
 \alias{coeftab.admb}
 \alias{print.coeftab}
 \title{
@@ -32,9 +32,9 @@ coeftab0(object,ctype="quad",sd=TRUE,
                  "quantile", sd = FALSE, \dots)
 \S3method{coeftab}{mcmc.list}(object, \dots)
 \S3method{coeftab}{lme}(object,ptype="fixef",ctype="quad",\dots) 
-\S3method{coeftab}{glmmML}(object,ctype="quad",\dots)
+\S3method{coeftab}{glmmML}(object,ptype="fixef",ctype="quad",\dots)
 \S3method{coeftab}{mer}(object,ptype="fixef",ctype="quad",\dots)
-\S3method{coeftab}{glmm.admb}(object,ptype="fixef",\dots)
+\S3method{coeftab}{glmmadmb}(object,ptype="fixef",\dots)
 \S3method{coeftab}{admb}(object,\dots)
 \S3method{print}{coeftab}(x,\dots)
 }
