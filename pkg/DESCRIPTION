@@ -6,9 +6,7 @@ Date: 2011-03-25
 Author: Ben Bolker, Yu-Sung Su
 Maintainer: Ben Bolker <bolker@mcmaster.ca>
 Description: Methods for plotting coefficients of statistical models (modified from coefplot in the arm package)
+Suggests: lme4, nlme, glmmADMB, arm, reshape, blme, MASS, bbmle, ggplot2, scapeMCMC, lattice
 Imports: lme4, lme4.0, Matrix, reshape
-Suggests: lme4, nlme, glmmADMB, arm, reshape, blme, MASS
-Imports: lme4, Matrix, reshape
-Suggests: lme4, nlme, glmmADMB, arm, reshape, blme, MASS
 Depends: methods, coda
 License: GPL

@@ -5,24 +5,25 @@
 \alias{coefplot2.model}
 \alias{coefplot2.fitList}
 \alias{coefplot2,numeric-method}
-\alias{coefplot2,lm-method}
-\alias{coefplot2,glm-method}
+\alias{coefplot2,admb-method}
+\alias{coefplot2,bmer-method}
 \alias{coefplot2,bugs-method}
-\alias{coefplot2,polr-method}
-\alias{coefplot2,mcmc-method}
+\alias{coefplot2,glm-method}
+\alias{coefplot2,glmmadmb-method}
+\alias{coefplot2,glmmML-method}
+\alias{coefplot2,glmmPQL-method}
+\alias{coefplot2,jags-method}
+\alias{coefplot2,list-method}
+\alias{coefplot2,lm-method}
+\alias{coefplot2,lme-method}
 \alias{coefplot2,mer-method}
 \alias{coefplot2,merMod-method}
-\alias{coefplot2,jags-method}
-\alias{coefplot2,rjags-method}
-\alias{coefplot2,list-method}
+\alias{coefplot2,mcmc-method}
 \alias{coefplot2,glmm.admb-method}
 \alias{coefplot2,MCMCglmm-method}
-\alias{coefplot2,glmmPQL-method}
-\alias{coefplot2,admb-method}
-\alias{coefplot2,glmmML-method}
-\alias{coefplot2,lme-method}
+\alias{coefplot2,polr-method}
+\alias{coefplot2,rjags-method}
 \alias{coefplot2,ANY-method}
-
 
 \title{Generic Function for Making Coefficient Plots}
 \description{
@@ -52,11 +53,11 @@ xlim=NULL, ylim=NULL, \dots)
                              legend=FALSE,legend.x="bottomright",legend.args=NULL,
                              \dots)
 \S4method{coefplot2}{numeric}(object, \dots)
+\S4method{coefplot2}{admb}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{lm}(object, varnames=NULL, intercept=FALSE, var.idx=NULL, \dots)
 \S4method{coefplot2}{glm}(object, varnames=NULL, intercept=FALSE, var.idx=NULL, \dots)
 \S4method{coefplot2}{polr}(object, varnames=NULL,  intercept=FALSE,
                 var.idx=NULL,\dots)
-\S4method{coefplot2}{admb}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{glmmML}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{lme}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)
 \S4method{coefplot2}{glmmPQL}(object, varnames=NULL,  intercept=FALSE, var.idx=NULL,\dots)

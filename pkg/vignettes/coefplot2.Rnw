@@ -1,0 +1,42 @@
+% \VignetteIndexEntry{basic examples of glmmADMB usage}
+\documentclass{article}
+%\usepackage{lineno}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+%\usepackage[usenames]{color}
+\usepackage[american]{babel}
+\newcommand{\R}{{\sf R}}
+\newcommand{\Splus}{{\sf S-PLUS}}
+%\newcommand{\fixme}[1]{\textbf{FIXME: #1}}
+\newcommand{\fixme}[1]{\color{red} #1 \color{black}}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{alltt}
+\newcommand{\code}[1]{{\tt #1}}
+\usepackage{fancyvrb}
+\VerbatimFootnotes
+\bibliographystyle{plain}
+
+\title{The \code{coefplot2} package}
+\author{Ben Bolker}
+\date{\today}
+\begin{document}
+\maketitle
+
+%\linenumbers
+
+\SweaveOpts{fig.width=5,fig.height=5,out.width="0.7\\textwidth"}
+<<setopts,echo=FALSE>>=
+Rver <- paste(R.version$major,R.version$minor,sep=".")
+@ 
+<<graphopts,echo=FALSE>>=
+library(ggplot2)
+library(grid)
+theme_update(theme_bw())
+zmargin <- opts(panel.margin=unit(0,"lines"))
+@ 
+
+
+\section{Introduction}
+
+\end{document}
