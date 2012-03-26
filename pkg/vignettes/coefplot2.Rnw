@@ -39,4 +39,17 @@ zmargin <- opts(panel.margin=unit(0,"lines"))
 
 \section{Introduction}
 
+The purpose of the \code{coefplot2} is to make the following tasks easy,
+or at least easier:
+\begin{itemize}
+\item quickly visualize the point estimates and measures of uncertainty of fitted statistical models;
+\item compare fits of models with different sets of predictors;
+\item compare fits of the same models fitted with different algorithms or implementations;
+\item produce beautiful, publication-quality plots of coefficient estimates
+\end{itemize}
+
+The starting point is the \code{coefplot} function in the \code{arm} package, which allows the first (see also the 
+
+\url{http://www.r-statistics.com/2010/07/visualization-of-regression-coefficients-in-r/}
 \end{document}
+
