@@ -32,7 +32,8 @@ S3method(coeftab,glmerMod)
 S3method(coeftab,glmmadmb)
 S3method(coeftab,admb)
 ##
-S3method(merge,coeftab)
+## not implemented yet: melt or merge?
+## S3method(merge,coeftab)
 S3method(print,coeftab)
 
 
