@@ -1,4 +1,4 @@
-% \VignetteIndexEntry{basic examples of glmmADMB usage}
+% \VignetteIndexEntry{The coefplot2 package}
 \documentclass{article}
 %\usepackage{lineno}
 \usepackage[utf8]{inputenc}
@@ -12,6 +12,7 @@
 \usepackage{url}
 \usepackage{hyperref}
 \usepackage{alltt}
+\usepackage{sober}
 \newcommand{\code}[1]{{\tt #1}}
 \usepackage{fancyvrb}
 \VerbatimFootnotes
@@ -25,17 +26,16 @@
 
 %\linenumbers
 
-\SweaveOpts{fig.width=5,fig.height=5,out.width="0.7\\textwidth"}
+\SweaveOpts{fig.width=7,fig.height=5,out.width="0.8\\textwidth",fig.align="center"}
 <<setopts,echo=FALSE>>=
 Rver <- paste(R.version$major,R.version$minor,sep=".")
 @ 
-<<graphopts,echo=FALSE>>=
+<<graphopts,echo=FALSE,message=FALSE>>=
 library(ggplot2)
 library(grid)
 theme_update(theme_bw())
 zmargin <- opts(panel.margin=unit(0,"lines"))
 @ 
-
 
 \section{Introduction}
 
@@ -43,13 +43,197 @@ The purpose of the \code{coefplot2} is to make the following tasks easy,
 or at least easier:
 \begin{itemize}
 \item quickly visualize the point estimates and measures of uncertainty of fitted statistical models;
-\item compare fits of models with different sets of predictors;
+\item compare fits of models with the same modeling approach but different sets of predictors;
 \item compare fits of the same models fitted with different algorithms or implementations;
-\item produce beautiful, publication-quality plots of coefficient estimates
+\item produce beautiful, flexible, publication-quality plots of coefficient estimates
 \end{itemize}
 
-The starting point is the \code{coefplot} function in the \code{arm} package, which allows the first (see also the 
+The starting point is the \code{coefplot} function in the \code{arm} package, which allows the first (see also \href{http://cran.r-project.org/web/packages/coefplot/index.html}{the  \code{coefplot} package} and
+\url{http://www.r-statistics.com/2010/07/visualization-of-regression-coefficients-in-r/})
 
-\url{http://www.r-statistics.com/2010/07/visualization-of-regression-coefficients-in-r/}
+\section{Design goals \& issues}
+
+\begin{description}
+\item[minimizing dependencies]{in order to meet its goal of understanding/being able to extract data from data structures from many packages, \code{coefplot2} will necessarily (at least) \code{Suggest:} many packages.  However, the chances for various nasty kinds of namespace pollution/collision are high, especially with various combinations of S3 and S4 methods (\code{nlme}, various flavours of \code{lme4}, \code{glmmADMB} \ldots).  Therefore, the dependencies should be made as weak as possible, and methods etc. should be imported only if absolutely necessary.}
+\item[modularity]{back-end (\code{coeftab}) should extract information in a flexible way into a standardized format, while front-end (\code{coefplot[2]}) should use this standardized format for plotting.
+  Furthermore, the code for merging lists of coefficients from different models (possibly with different subsets of parameters), currently inside \code{coefplot2.fitList} should be abstracted into a separate function for merging \code{coeftab} objects into \code{coeftabList} objects (or something like that)}
+\item[back-end flexibility]{different model types have different kinds of parameters.  I am particularly interested in mixed models, where we might be interested in picking out (1) fixed-effect parameters; (2) random effects; (3) variance parameters [in different parameterizations -- (log)-Cholesky factor, variance/covariance, standard deviation/correlation ...].  Other models may have other kinds of parameters -- dispersion parameters (some GLM[M]s and negative binomial models), heteroscedasticity and correlation parameters (e.g. from \code{lme}), zero-inflation parameters (from \code{glmmADMB}, \code{pscl}), \ldots}
+\item[alternative plotting front-ends]{it's a pain, but all three of the existing plotting interfaces (base, \code{lattice}, and \code{ggplot}) have  different features that make supporting all three of them (potentially) worthwhile
+  \begin{itemize}
+  \item base graphics are the hardest to make look pretty, and require lots of parameters to be defined, but are also the easiest for users to understand, modify, and augment
+  \item lattice graphics are intermediate: prettier by default (and some prefer the style to ggplot's), but still typically require lots of parameters.  Plotting confidence intervals is tricky without writing customized panel functions (or using \code{Hmisc}'s \code{xYplot} extension to get the same results).  \code{lattice} is also self-contained, and Recommended, so carries no additional dependencies.  For this case, extending the \code{xyplot} S3 generic function is probably the way to go \ldots
+  \item ggplot graphics are (perhaps) the prettiest, and allow a good deal of flexibility, but also carry a string of dependencies (although they are tightly coupled and hence less of a problem). More importantly, they require a bit of a paradigm shift on the user's part, relative to base graphics.  Here it's probably best to use the \code{fortify} and \code{autoplot} mechanisms (see e.g. \code{fortify.confint.glht} in \code{ggplot2}).
+\end{itemize}
+}
+\item[options for error bars]{provide a reasonably flexible way to specify the definition of the error bars: could be $\pm$ a specified number of SD, an $\alpha$ level (translated via normal approximation, or ?? $t$ approximation if applicable?, or translated to a credible interval, or a quantile \ldots)}
+\item[default aesthetics]{there are some design tradeoffs; it won't hurt to do things the way we like them, but we should provide flexibility for those who want to be more old-fashioned/please reviewers, supervisors, etc.
+\begin{itemize}
+\item point-range graphs (cleaner? less non-data-ink?) vs. traditional   error bars with serifs/end caps
+\item inner/outer bars (e.g. thick lines for $\pm 1 SD$ or 50\% credible intervals; thin lines for $\pm 2 SD$ or 95\% CI) vs traditional error bars
+\item horizontal presentation (allows more room for labels) vs traditional vertical presentation (more familiar, but often requires staggering/rotating/abbreviating labels)
+\item allow for violin plots etc. in scenarios that allow them (bootstrap, MCMC CI)?
+\end{itemize}
+}
+\item[information to be incorporated in \code{coeftab}]{we need to decide what kind of information \code{coeftab} should carry along.  e.g. it will be very useful for it to know the assignments of categorical variables to factors (so these can be grouped in the output).  It might be useful for it to know (1) standard deviations of predictor variables (for post-hoc scaling), (2) link functions (for back-transformation).  Should the  \ldots ?}
+\item[transformations]{make it easy, or at least possible, for users to (1) back-transform estimates and CI from a predictor to a response scale; (2) change from unscaled to scaled parameter estimates (this might require access to the original model, or at least the model frame)}
+\item[grouping]{want to allow access to grouping variables for parameters, such as factor assignment of parameters, allowing them to be grouped by point/line colour or (?) by background rectangles (see Glycera example)}
+
+\end{description}
+
+\section{description of \code{coeftab}}
+
+\code{coeftab} currently inherits from \code{data.frame}.  It has columns for a point estimate, the standard error of the estimate (usually based on local curvature), and some number of quantiles (by default 2.5, 25, 75, 97.5), which could be derived in a variety of different ways (based on SE with normal or $t$ distribution, or on quantiles or HPD intervals of MCMC output, or (??) on bootstrap or parametric bootstrap output).  We could make the structure richer, e.g. by creating a list of components for different parameter types (fixed vs random effects/BLUPs vs variances/covariances vs dispersion or zero-inflation parameters \ldots) --- this might have advantages but would have a big disadvantage in terms of overall transparency and letting users hack what they needed out of the results (unless we were extremely careful in designing accessors etc. so that the objects still \emph{looked} like data frames).  \code{coeftab}s may also contain $p$-value columns. The cheaper/cheesier way to carry along information would be in attributes, which could be hidden in the default plot method.  (At present \code{print.coeftab} is set to \code{printCoefmat}, so that $p$-values are formatted nicely if present.)
+
+I'm not quite sure how lists of \code{coeftab}s should be handled: should there be a separate class for them, so the lists can be kept separate until merging is needed for plotting/formatting?
+
+\section{description of \code{coefplot}}
+
+
+\section{\code{arm::coefplot} examples}
+<<armcoefplotex,echo=FALSE,message=FALSE,warning=FALSE>>=
+library(arm)
+## examples from ?arm::coefplot
+y1 <- rnorm(1000,50,23)
+y2 <- rbinom(1000,1,prob=0.72)
+x1 <- rnorm(1000,50,2) 
+x2 <- rbinom(1000,1,prob=0.63) 
+x3 <- rpois(1000, 2) 
+x4 <- runif(1000,40,100) 
+x5 <- rbeta(1000,2,2) 
+longnames <- c("a long name01","a long name02","a long name03",
+               "a long name04","a long name05")
+     
+fit1 <- lm(y1 ~ x1 + x2 + x3 + x4 + x5)
+fit2 <- glm(y2 ~ x1 + x2 + x3 + x4 + x5, 
+            family=binomial(link="logit"))
+op <- par()
+@ 
+
+<<armcoefplot4prelim,echo=FALSE>>=
+## plot 4: comparison to show bayesglm works better than glm
+n <- 100
+x1 <- rnorm (n)
+x2 <- rbinom (n, 1, .5)
+b0 <- 1
+b1 <- 1.5
+b2 <- 2
+y <- rbinom (n, 1, invlogit(b0+b1*x1+b2*x2))
+y <- ifelse (x2==1, 1, y)
+x1 <- rescale(x1)
+x2 <- rescale(x2, "center")     
+M1 <- glm (y ~ x1 + x2, family=binomial(link="logit"))
+## display (M1)
+M2 <- bayesglm (y ~ x1 + x2, family=binomial(link="logit"))
+## display (M2)
+@ 
+
+<<armcoefplot1to3,fig.keep="last">>=
+## plot 1
+par (mfrow=c(2,2))
+coefplot(fit1)
+coefplot(fit2, col.pts="blue")
+## plot 2
+longnames <- c("(Intercept)", longnames) 
+coefplot(fit1, longnames, intercept=TRUE, CI=1)    
+## plot 3
+coefplot(fit2, vertical=FALSE, var.las=1, frame.plot=TRUE)
+@ 
+
+<<>>=
+## plot 4, stacked: bayesglm >> glm
+coefplot(M2, xlim=c(-1,5), intercept=TRUE)
+coefplot(M1, add=TRUE, col.pts="red")
+@ 
+
+<<armcoefplot4C,fig.keep="last">>=
+##==================== 
+## arrayed plot       
+##====================
+par(mfrow=c(1,2))
+x.scale <- c(0, 7.5) ## fix x.scale for comparison
+coefplot(M1, xlim=x.scale, main="glm", intercept=TRUE)
+coefplot(M2, xlim=x.scale, main="bayesglm", intercept=TRUE)
+@ 
+
+<<armcoefplot5A,echo=FALSE,message=FALSE>>=
+M3 <- polr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing)
+M4 <- bayespolr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing)
+@ 
+<<armcoefplot5,fig.keep="last">>=
+## plot 5: the ordered logit model from polr
+par(mfrow=c(1,2))
+coefplot(M3, main="polr")
+coefplot(M4, main="bayespolr", add=TRUE, col.pts="red")
+@ 
+  
+<<armcoefplot6,warning=FALSE>>=
+#### plot 6: plot bugs & lmer
+library(lme4.0)
+M5 <- lmer(Reaction ~ Days + (1|Subject), sleepstudy)
+## M5.sim <- mcsamp(M5)
+## coefplot(M5, var.idx=5:22, CI=1, ylim=c(18,1), main="lmer model")
+detach("package:lme4.0")
+@      
+
+<<armcoefplot7,fig.keep="last">>=
+## plot 7: plot coefficients & sds vectors
+par(mfrow=c(1,2))
+coef.vect <- c(0.2, 1.4, 2.3, 0.5)
+sd.vect <- c(0.12, 0.24, 0.23, 0.15)
+longnames <- c("var1", "var2", "var3", "var4")
+coefplot (coef.vect, sd.vect, varnames=longnames, main="Regression Estimates")
+coefplot (coef.vect, sd.vect, varnames=longnames, vertical=FALSE, 
+          var.las=1, main="Regression Estimates")
+@ 
+
+<<>>=
+detach("package:arm")
+detach("package:lme4")
+@ 
+
+\section{Prettier graphs}
+
+\subsection{Using \code{lattice}}
+
+Have \code{dotplot} method established.  Harder to figure out to get confidence intervals:
+see \url{https://stat.ethz.ch/pipermail/r-help/2006-October/114897.html},
+\code{memisc::panel.errbars}
+
+<<>>=
+dotplot.coeftab <- function(object,horizontal=FALSE,...) {
+    object$pnames <- rownames(object)
+    if (!horizontal) {
+        dotplot(pnames~Estimate,type="p",data=object,...)
+    } else {
+        dotplot(Estimate~pnames,type="p",data=object,...)
+    }
+}
+dotplot(coeftab(M1))
+dotplot(coeftab(M1),horizontal=TRUE)
+@ 
+
+\subsection{\code{ggplot2}}
+<<>>=
+fortify.coeftab <- function(object) {
+    object$pnames <- rownames(object)
+    object <- plyr::rename(object,
+                 c(`Std. Error`="std_error",`2.5%`="lwr",`97.5%`="upr",
+                   `25%`="lwr2",`75%`="upr2"))
+    as.data.frame(object)
+} 
+qplot(pnames,Estimate,ymin=lwr,ymax=upr,
+      data=fortify(coeftab(M2)),geom="pointrange")+coord_flip()
+@ 
+
+\section{Miscellaneous/to do}
+
+\begin{itemize}
+  \begin{itemize}
+  \item write a \code{merge.coeftab} method
+  \item allow more flexible selection of \code{var.idx} (e.g. by regular expression)
+  \item save grouping information on parameters
+  \item sort out the various model list/coeftab structures!
+  \end{itemize}
 \end{document}
+
 

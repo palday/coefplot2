@@ -12,7 +12,7 @@
 ##   'type' can be one OR MORE of 'fixef', 'ranef', 'vcov'
 ##    (these are not distinguishable for some models?)
 ##
-## ptype: "fixef", "ranef", "vcov"
+## ptype: "fixef", "ranef", "vcov", "sdcor"
 ## ctype: "profile", "quantile", "HPDinterval", "quad"
 ## sd: TRUE or FALSE
 ## clevel: numeric vector (values between 0 and 1)
@@ -129,7 +129,7 @@ coeftab.lme <- function(object,ptype="fixef",
   clist <- list(ftab=NULL, rtab=NULL, vtab=NULL)
   ## coeftab.default?
   if ("fixef" %in% ptype)
-    clist$ftab <- coeftab0(summary(object)$tTable[,1:2],...)
+    clist$ftab <- coeftab0(summary(object)$tTable[,1:2,drop=FALSE],...)
   if ("ranef" %in% ptype) {
     ## FIXME: allow parameters to be passed through to ranef.lme?
     rr <- unlist(ranef(object))
@@ -139,7 +139,11 @@ coeftab.lme <- function(object,ptype="fixef",
   if  ("vcov" %in% ptype) {
     vv <- nlme::VarCorr(object)
     if (ncol(vv)>2) stop("can't yet handle multiple variance-covariance terms (correlation)")
-    clist$vtab <- coeftab0(cbind(as.numeric(vv[,"StdDev"]),NA),...)
+    clist$vtab <- coeftab0(cbind(as.numeric(vv[,"Variance"]),NA),...)
+  }
+  if ("sdcor" %in% ptype) {
+      vv <- nlme::VarCorr(object)
+      clist$sdtab <- coeftab0(cbind(as.numeric(vv[,"Variance"]),NA),...)
   }
   do.call(rbind,unname(clist))
 }
@@ -226,7 +230,7 @@ coeftab.glmmadmb <- function(object,ptype="fixef",...) {
 
 ## should work for: lm, lmer?
 coeftab.default <- function(object,ctype="quad",...) {
-  cc <- coeftab0(coef(summary(object))[,1:2],...)
+  cc <- coeftab0(coef(summary(object))[,1:2,drop=FALSE],...)
   ## FIXME: deal with types that don't have a working model.matrix()
   attr(cc,"assign") <- try(attr(model.matrix(object),"assign"),silent=TRUE)
   cc
@@ -236,7 +240,7 @@ coeftab.admb <- function(object,...) {
   mvals <- object$coefficients
   if (!is.null(object$mcmc)) {
     ctab <- coeftab(as.mcmc(object$mcmc),...)
-    ctab[,1] <- mvals
+    ctab[,1,drop=FALSE] <- mvals
   } else {
     ctab <- coeftab0(cbind(mvals,object$se),...)
   }
@@ -265,8 +269,8 @@ coeftab0 <- function(object,
     if (!missing(df) && length(df)>1)
       stop("can only compute p-values for a single df value")
   }
-  mval <- object[,1]
-  sdval <- object[,2]
+  mval  <- setNames(object[,1],rownames(object))
+  sdval <- setNames(object[,2],rownames(object))
   if (missing(cmult)) { ## compute CIs based on 'clevel'
     if (missing(df)) {
       ## no df specified: Z-score, etc.

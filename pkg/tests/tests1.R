@@ -16,5 +16,16 @@ if (FALSE)  {
   save(list=ls(pattern="epil2_"),file="epil2_fits.RData")
 }
 load("epil2_fits.RData")
-coeftab(epil2_glmer_0)
+
+convert_oldmer <- function(x) {
+    cc <- class(x)
+    if (!(cc=="mer" && attr(cc,"package")=="lme4"))
+        stop("this function is designed to 'mer' objects from (old) lme4",
+             " to 'mer' objects from lme4.0")
+    attr(cc,"package") <- "lme4.0"
+    class(x) <- cc
+    x
+}
+
+coeftab(convert_oldmer(epil2_glmer_0))
 coefplot2(list(epil2_glmer_0,epil2_glmer_1,epil2_glmmADMB))

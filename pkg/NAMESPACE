@@ -1,10 +1,12 @@
 export(coefplot2,coefplot2.default,coeftab,coeftab0,
        coefplot2.fitList,extend_tab)
-importClassesFrom(lme4.0,summary.mer)
-importMethodsFrom(lme4.0,coef,summary,show,model.matrix,VarCorr)
+## Try to AVOID importing classes if at all possible -- especially
+##   between nlme/lme4.0/lme4/glmmADMB
+## importClassesFrom(lme4.0,summary.mer)
+## importMethodsFrom(lme4.0,coef,summary,show,model.matrix,VarCorr)
 ## importFrom(nlme,VarCorr) ## conflict!
 importFrom(Matrix,summary)
-exportMethods(coefplot2,summary,coef,show,model.matrix)
+## exportMethods(coefplot2,summary,coef,show,model.matrix)
 importFrom(reshape,melt)
 ## avoid lme4a dependence ...
 ## importClassesFrom(lme4a,merMod)
@@ -30,6 +32,7 @@ S3method(coeftab,glmerMod)
 S3method(coeftab,glmmadmb)
 S3method(coeftab,admb)
 ##
+S3method(merge,coeftab)
 S3method(print,coeftab)
 
 

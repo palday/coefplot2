@@ -28,7 +28,10 @@ coefplot2.default <- function(coefs, sds,
                               vertical=TRUE,
                               v.axis=TRUE, h.axis=TRUE,
                               top.axis=TRUE,
-                              cex.var=0.8, cex.pts=0.9, col.pts=1, pch.pts=16,
+                              cex.var=0.8,
+                              cex.pts=0.9,
+                              cex.axis=1,
+                              col.pts=1, pch.pts=16,
                               var.las=2,
                               main="Regression estimates",
                               xlab="", ylab="",
@@ -112,7 +115,7 @@ coefplot2.default <- function(coefs, sds,
           par(mar=mar)
           if (missing(xlim)) xlim <- dlim
           plot(c(coefs.l, coefs.h), c(idx+k,idx-k), type="n",
-               axes=FALSE, main=main, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab,...) 
+               axes=FALSE, main=main, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, ...) 
           if (h.axis){                                                  
             if (top.axis) axis(3) else axis(1)
           }
@@ -317,4 +320,70 @@ setMethod("coefplot2", signature(object = "ANY"),
             coefplot2.model(object,...)
           })
 
+as.coeftabList <- function(...,merge.names=TRUE) {
+    L <- list(...)
+    coeflist<- lapply(L,
+                      function(x) {
+                          if (inherits(x,"coeftab")) { x } else
+                          coeftab(x,sd=FALSE,p.val=FALSE, ...)})
+    ## FIXME:: should merge.names apply in coeftabList or in melt.coeftabList??
+    if (merge.names) {
+        allnames <- unique(unlist(lapply(coeflist,rownames)))
+        coeflist <- lapply(coeflist,extend_tab,vnames=allnames)
+    }
+    if (is.null(Lnames <- names(L))) {
+        ## try to guess names from input (fragile?? use mod[1..n] instead?)
+        Lnames <- sapply(as.list(match.call()),deparse)[-1]
+        Lnames <- Lnames[seq_along(L)]
+    }
+    names(coeflist) <- Lnames
+    class(coeflist) <- "coeftabList"
+    coeflist
+}
 
+melt.coeftabList <- function(data,fortify=FALSE,...) {
+    ## combined function for melting alone (produces best human-readable data frame)
+    ##  or melting+fortifying (adds extra info usable by ggplot2)
+    if (!fortify) {
+        ff <- function(d,n) data.frame(d,model=n,check.names=FALSE)
+    } else {
+        ff <- function(d,n) data.frame(d,model=n,param=rownames(d),check.names=FALSE)
+    }
+    m1 <- mapply(ff,data,names(data),SIMPLIFY=FALSE)
+    m2 <- do.call(rbind,m1)
+    if (fortify) {
+        m2 <- plyr::rename(m2,c(`2.5%`="lwr",
+                                `25%`="lwr2",
+                                `75%`="upr2",
+                                `97.5%`="upr"))
+        rownames(m2) <- NULL
+    }
+    m2
+}
+
+fortify.coeftabList <- function(data,...) {
+    melt(data,fortify=TRUE,...)
+}
+
+autoplot.coeftabList <- function(data,dodge.width=0.5,horizontal=FALSE,
+                                 zeroline=TRUE,...) {
+    ## FIXME: what other built-in options should be allowed?
+    g0 <- ggplot(fortify(data),aes(x=param,y=Estimate,ymin=lwr,ymax=upr,colour=model))
+    if (zeroline) g0 <- g0 + geom_hline(yintercept=0)
+    g0 <- g0 + geom_pointrange(position=position_dodge(width=dodge.width))
+    if (!horizontal) g0 <- g0 + coord_flip()
+    g0
+}
+
+if (FALSE) {
+    ## testing
+    ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+    trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+    group <- gl(2,10,20, labels=c("Ctl","Trt"))
+    weight <- c(ctl, trt)
+    lm.D9 <- lm(weight ~ group)
+    lm.D90 <- lm(weight ~ group - 1) # omitting intercept
+    L1 <- as.coeftabList(lm.D9,lm.D90)  ## not necessarily a sensible answer
+    require(ggplot2)
+    autoplot(L1)
+}
