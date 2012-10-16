@@ -33,8 +33,8 @@ Rver <- paste(R.version$major,R.version$minor,sep=".")
 <<graphopts,echo=FALSE,message=FALSE>>=
 library(ggplot2)
 library(grid)
-theme_update(theme_bw())
-zmargin <- opts(panel.margin=unit(0,"lines"))
+theme_set(theme_bw())
+zmargin <- theme(panel.margin=unit(0,"lines"))
 @ 
 
 \section{Introduction}
@@ -200,6 +200,7 @@ see \url{https://stat.ethz.ch/pipermail/r-help/2006-October/114897.html},
 \code{memisc::panel.errbars}
 
 <<>>=
+library(coefplot2)
 dotplot.coeftab <- function(object,horizontal=FALSE,...) {
     object$pnames <- rownames(object)
     if (!horizontal) {
@@ -228,12 +229,11 @@ qplot(pnames,Estimate,ymin=lwr,ymax=upr,
 \section{Miscellaneous/to do}
 
 \begin{itemize}
-  \begin{itemize}
-  \item write a \code{merge.coeftab} method
-  \item allow more flexible selection of \code{var.idx} (e.g. by regular expression)
-  \item save grouping information on parameters
-  \item sort out the various model list/coeftab structures!
-  \end{itemize}
+\item write a \code{merge.coeftab} method
+\item allow more flexible selection of \code{var.idx} (e.g. by regular expression)
+\item save grouping information on parameters
+\item sort out the various model list/coeftab structures!
+\end{itemize}
 \end{document}
 
 
