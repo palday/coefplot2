@@ -1,5 +1,5 @@
 # Makefile to use knitr for package vignettes
-R_HOME=/usr/local
+## R_HOME=/usr/local
 
 # put all PDF targets here, separated by spaces
 PDFS= coefplot2.pdf
