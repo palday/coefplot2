@@ -1,6 +1,6 @@
 library(coefplot2)
 library(lme4)
-library(glmmADMB)
+## FIXME: stubbed out glmmADMB, 6 Nov 2012 r-forge problems
 if (FALSE)  {
   ## lme4
   epil2 <- transform(epil2,
@@ -11,6 +11,7 @@ if (FALSE)  {
   epil2_glmer_1 <- update(epil2_glmer_1,.~.+(1|indiv))
   ##
   ## glmmADMB (0.5-2)
+  library(glmmADMB)
   epil2_glmmADMB <- glmmadmb(y~Base*trt+Age+Visit+(Visit|subject),
                               data=epil2, family="nbinom")
   save(list=ls(pattern="epil2_"),file="epil2_fits.RData")
