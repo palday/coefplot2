@@ -12,7 +12,7 @@
 \usepackage{url}
 \usepackage{hyperref}
 \usepackage{alltt}
-\usepackage{sober}
+% \usepackage{sober} %% not available on -r-forge
 \newcommand{\code}[1]{{\tt #1}}
 \usepackage{fancyvrb}
 \VerbatimFootnotes
@@ -139,7 +139,7 @@ coefplot(fit1, longnames, intercept=TRUE, CI=1)
 coefplot(fit2, vertical=FALSE, var.las=1, frame.plot=TRUE)
 @ 
 
-<<>>=
+<<plot4>>=
 ## plot 4, stacked: bayesglm >> glm
 coefplot(M2, xlim=c(-1,5), intercept=TRUE)
 coefplot(M1, add=TRUE, col.pts="red")
@@ -168,11 +168,11 @@ coefplot(M4, main="bayespolr", add=TRUE, col.pts="red")
   
 <<armcoefplot6,warning=FALSE>>=
 #### plot 6: plot bugs & lmer
-library(lme4.0)
+library("lme4")
 M5 <- lmer(Reaction ~ Days + (1|Subject), sleepstudy)
 ## M5.sim <- mcsamp(M5)
 ## coefplot(M5, var.idx=5:22, CI=1, ylim=c(18,1), main="lmer model")
-detach("package:lme4.0")
+## detach("package:lme4") ## needed by arm
 @      
 
 <<armcoefplot7,fig.keep="last">>=
@@ -214,12 +214,16 @@ dotplot(coeftab(M1),horizontal=TRUE)
 @ 
 
 \subsection{\code{ggplot2}}
-<<>>=
+<<fortify>>=
 fortify.coeftab <- function(object) {
     object$pnames <- rownames(object)
-    object <- plyr::rename(object,
-                 c(`Std. Error`="std_error",`2.5%`="lwr",`97.5%`="upr",
-                   `25%`="lwr2",`75%`="upr2"))
+    vlocs <- match(c("Std. Error","2.5%","25%","75%","97.5%"),names(object))
+    names(object)[vlocs] <- c("std_error","lwr","lwr2","upr2","upr")
+    ## object <- plyr::rename(object,
+    ## c(`Std. Error`="std_error",`2.5%`="lwr",`97.5%`="upr",
+    ## `25%`="lwr2",`75%`="upr2"))
+    ## live with this for now
+    ## repeated code from melt.coeftabList .... ?
     as.data.frame(object)
 } 
 qplot(pnames,Estimate,ymin=lwr,ymax=upr,
