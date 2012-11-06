@@ -15,6 +15,8 @@ if (FALSE)  {
                               data=epil2, family="nbinom")
   save(list=ls(pattern="epil2_"),file="epil2_fits.RData")
 }
+if (FALSE) {
+    ## stubbed out: further lme4.0/lme4 problems
 load("epil2_fits.RData")
 
 convert_oldmer <- function(x) {
@@ -29,3 +31,4 @@ convert_oldmer <- function(x) {
 
 coeftab(convert_oldmer(epil2_glmer_0))
 coefplot2(list(epil2_glmer_0,epil2_glmer_1,epil2_glmmADMB))
+}

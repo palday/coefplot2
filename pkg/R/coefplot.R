@@ -352,10 +352,13 @@ melt.coeftabList <- function(data,fortify=FALSE,...) {
     m1 <- mapply(ff,data,names(data),SIMPLIFY=FALSE)
     m2 <- do.call(rbind,m1)
     if (fortify) {
-        m2 <- plyr::rename(m2,c(`2.5%`="lwr",
-                                `25%`="lwr2",
-                                `75%`="upr2",
-                                `97.5%`="upr"))
+        vlocs <- match(c("2.5%","25%","75%","97.5%"),names(m2))
+        names(m2)[vlocs] <- c("lwr","lwr2","upr2","upr")
+        ## avoid plyr dependency
+        ## plyr::rename(m2,c(`2.5%`="lwr",
+        ##                         `25%`="lwr2",
+        ##                         `75%`="upr2",
+        ##                         `97.5%`="upr"))
         rownames(m2) <- NULL
     }
     m2
@@ -368,6 +371,7 @@ fortify.coeftabList <- function(data,...) {
 autoplot.coeftabList <- function(data,dodge.width=0.5,horizontal=FALSE,
                                  zeroline=TRUE,...) {
     ## FIXME: what other built-in options should be allowed?
+    param <- Estimate <- lwr <- upr <- model <- NULL ## avoid check 'no visible binding' false positive
     g0 <- ggplot(fortify(data),aes(x=param,y=Estimate,ymin=lwr,ymax=upr,colour=model))
     if (zeroline) g0 <- g0 + geom_hline(yintercept=0)
     g0 <- g0 + geom_pointrange(position=position_dodge(width=dodge.width))

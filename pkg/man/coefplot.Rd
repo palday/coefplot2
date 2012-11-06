@@ -35,7 +35,7 @@ coefplot2(object,\dots)
 
 \method{coefplot2}{default}(coefs, sds, varnames=NULL, CI=2,
                 vertical=TRUE, v.axis=TRUE, h.axis=TRUE, top.axis=TRUE,
-                cex.var=0.8, cex.pts=0.9, 
+                cex.var=0.8, cex.pts=0.9, cex.axis=1,
                 col.pts=1, pch.pts=16, var.las=2,
                 main="Regression estimates",
                 xlab="", ylab="", mar=NULL, plot=TRUE,
@@ -98,6 +98,7 @@ xlim=NULL, ylim=NULL, \dots)
   \item{h.axis}{(logical) show left axis?}
   \item{cex.var}{Font size of variable names}
   \item{cex.pts}{Size of data points}
+  \item{cex.axis}{Font size of axis ticks}
   \item{col.pts}{Color of points and segments}
   \item{pch.pts}{Symbol of points}
   \item{var.las}{Orientation of variable names against the axis:
