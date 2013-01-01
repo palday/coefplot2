@@ -236,13 +236,14 @@ coeftab.default <- function(object,ctype="quad",...) {
   cc
 }
 
-coeftab.admb <- function(object,...) {
-  mvals <- object$coefficients
+coeftab.admb <- function(object,type="par",...) {
+  mvals <- coef(object,type)
   if (!is.null(object$mcmc)) {
     ctab <- coeftab(as.mcmc(object$mcmc),...)
     ctab[,1,drop=FALSE] <- mvals
   } else {
-    ctab <- coeftab0(cbind(mvals,object$se),...)
+    ## FIXME: allow for sdreport variables?
+    ctab <- coeftab0(cbind(mvals,object$se[seq(nrow(mvals))]),...)
   }
   ctab
 }
